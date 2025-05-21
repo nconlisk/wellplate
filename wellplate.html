@@ -53,6 +53,11 @@
         <button onclick="processCSV()">Apply</button>
         <button onclick="downloadPDF()" style="margin-left: 10px;">Download PDF</button>
     </div>
+
+    <!--Added plate title from csv filename-->
+    <h2 id="plateName">Plate</h2>
+    <!---->
+
     <div class="container">
         <!-- Column Labels -->
         <div class="column-label"></div>
@@ -82,18 +87,18 @@
                     rowLabel.textContent = row;
                     container.appendChild(rowLabel);
 
-                    // Add wells for this row
-                    let wellNumber = (rows.indexOf(row) * 12) + 1;
                     for (let col = 1; col <= 12; col++) {
                         const well = document.createElement('div');
                         well.className = 'well';
                         well.dataset.row = row;
                         well.dataset.col = col;
-                        well.textContent = wellNumber++;
                         container.appendChild(well);
                     }
                 });
             });
+        </script>
+        <script>
+
         </script>
     </div>
 
@@ -101,6 +106,31 @@
         function processCSV() {
             const file = document.getElementById('csvInput').files[0];
             const threshold = parseFloat(document.getElementById('threshold').value);
+
+            // Added to label plate based on file name
+            let plate = file.name.split('.')[0]
+            document.getElementById('plateName').textContent = plate;
+            //
+
+            // Add well numbers based on if data is first or second plate
+            const rows = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H'];
+            rows.forEach(row => {
+                // Add well labels for plate-2
+                if (plateName.textContent.endsWith('-2')) {
+                    let wellNumber = (rows.indexOf(row) * 12) + 97;
+                    for (let col = 1; col <= 12; col++) {
+                        document.querySelector(`.well[data-row="${row}"][data-col="${col}"]`).textContent = wellNumber++;
+                    }
+                } else {
+                    // Add well labels for plate-1
+                    let wellNumber = (rows.indexOf(row) * 12) + 1;
+                    for (let col = 1; col <= 12; col++) {
+                        document.querySelector(`.well[data-row="${row}"][data-col="${col}"]`).textContent = wellNumber++;
+                    }
+                }
+
+            });
+            //
 
             if (!file) return;
 
