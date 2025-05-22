@@ -54,52 +54,52 @@
         <button onclick="downloadPDF()" style="margin-left: 10px;">Download PDF</button>
     </div>
 
-    <!--Added plate title from csv filename-->
-    <h2 id="plateName">Plate</h2>
-    <!---->
+    <div class="titled-grid">
 
-    <div class="container">
-        <!-- Column Labels -->
-        <div class="column-label"></div>
-        <div class="column-label">1</div>
-        <div class="column-label">2</div>
-        <div class="column-label">3</div>
-        <div class="column-label">4</div>
-        <div class="column-label">5</div>
-        <div class="column-label">6</div>
-        <div class="column-label">7</div>
-        <div class="column-label">8</div>
-        <div class="column-label">9</div>
-        <div class="column-label">10</div>
-        <div class="column-label">11</div>
-        <div class="column-label">12</div>
+        <!--Added plate title from csv filename-->
+        <h2 id="plateName">Plate</h2>
+        <!---->
 
-        <!-- Rows A-H with labels and wells -->
-        <script>
-            document.addEventListener('DOMContentLoaded', () => {
-                const container = document.querySelector('.container');
-                const rows = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H'];
+        <div class="container">
+            <!-- Column Labels -->
+            <div class="column-label"></div>
+            <div class="column-label">1</div>
+            <div class="column-label">2</div>
+            <div class="column-label">3</div>
+            <div class="column-label">4</div>
+            <div class="column-label">5</div>
+            <div class="column-label">6</div>
+            <div class="column-label">7</div>
+            <div class="column-label">8</div>
+            <div class="column-label">9</div>
+            <div class="column-label">10</div>
+            <div class="column-label">11</div>
+            <div class="column-label">12</div>
 
-                rows.forEach(row => {
-                    // Add row label
-                    const rowLabel = document.createElement('div');
-                    rowLabel.className = 'row-label';
-                    rowLabel.textContent = row;
-                    container.appendChild(rowLabel);
+            <!-- Rows A-H with labels and wells -->
+            <script>
+                document.addEventListener('DOMContentLoaded', () => {
+                    const container = document.querySelector('.container');
+                    const rows = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H'];
 
-                    for (let col = 1; col <= 12; col++) {
-                        const well = document.createElement('div');
-                        well.className = 'well';
-                        well.dataset.row = row;
-                        well.dataset.col = col;
-                        container.appendChild(well);
-                    }
+                    rows.forEach(row => {
+                        // Add row label
+                        const rowLabel = document.createElement('div');
+                        rowLabel.className = 'row-label';
+                        rowLabel.textContent = row;
+                        container.appendChild(rowLabel);
+
+                        for (let col = 1; col <= 12; col++) {
+                            const well = document.createElement('div');
+                            well.className = 'well';
+                            well.dataset.row = row;
+                            well.dataset.col = col;
+                            container.appendChild(well);
+                        }
+                    });
                 });
-            });
-        </script>
-        <script>
-
-        </script>
+            </script>
+        </div>
     </div>
 
     <script>
@@ -166,7 +166,7 @@
         });
 
         function downloadPDF() {
-            html2canvas(document.querySelector('.container')).then(canvas => {
+            html2canvas(document.querySelector('.titled-grid')).then(canvas => {
                 const imgData = canvas.toDataURL('image/png');
                 const pdf = new jspdf.jsPDF('l', 'mm', 'a4');
                 const imgWidth = 280;
