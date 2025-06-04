@@ -49,7 +49,7 @@
 <body>
     <div style="margin: 20px;">
         <input type="file" id="csvInput" accept=".csv">
-        <label>Threshold: <input type="number" id="threshold" value="0.5" step="0.1"></label>
+        <label>Threshold: <input type="number" id="threshold" value="500000" step="1000"></label>
         <button onclick="processCSV()">Apply</button>
         <button onclick="downloadPDF()" style="margin-left: 10px;">Download PDF</button>
     </div>
@@ -108,17 +108,19 @@
             const threshold = parseFloat(document.getElementById('threshold').value);
 
             // Added to label plate based on file name
-            let plate = file.name.split('.')[0]
-            document.getElementById('plateName').textContent = plate;
+            const plateName = document.getElementById('plateName');
+            let plate = file.name.split('.')[0];
+            plateName.textContent = plate;
             //
 
             // Add well numbers based on if data is first or second plate
             const rows = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H'];
             rows.forEach(row => {
                 // Add well labels for plate-2
-                if (plateName.textContent.endsWith('-2')) {
+                if (plateName.textContent.includes('-2')) {
                     let wellNumber = (rows.indexOf(row) * 12) + 97;
                     for (let col = 1; col <= 12; col++) {
+                        if (row === 'A' && col === 1) console.log('Plate-2 numbering activated');
                         document.querySelector(`.well[data-row="${row}"][data-col="${col}"]`).textContent = wellNumber++;
                     }
                 } else {
@@ -137,24 +139,33 @@
             const reader = new FileReader();
             reader.onload = function (e) {
                 const csvData = e.target.result;
-                const rows = csvData.split('\n').slice(1);
+                const headers = csvData.split('\n')[0].split(',');
+                const rowIdx = headers.indexOf('Row');
+                const colIdx = headers.indexOf('Column');
+                const vcdIdx = headers.indexOf('VCD [#/ml]');
 
-                rows.forEach(row => {
-                    if (row.startsWith('Well,')) return; // Skip header
-                    const [wellId, value] = row.split(',');
-                    if (!wellId) return;
+                const selectedData = csvData.split('\n').slice(1).map(line => {
+                    const cells = line.split(',');
+                    return {
+                        row: cells[rowIdx],
+                        column: cells[colIdx],
+                        vcd: parseFloat(cells[vcdIdx]) // Handle scientific notation
+                    };
+                }).filter(item => !isNaN(item.vcd)); // Remove invalid entries
 
-                    const well = document.querySelector(`.well[data-row="${wellId[0]}"][data-col="${wellId.slice(1)}"]`);
-                    if (well) {
-                        let numericValue = parseFloat(value);
-                        if (isNaN(numericValue) || value?.trim() === '') {
-                            numericValue = 0;
-                        }
-                        well.classList.remove('above', 'below', 'active');
-                        if (numericValue === 0) return;
-                        well.classList.add('active', numericValue >= threshold ? 'above' : 'below');
-                    }
+
+                selectedData.forEach(({ row, column, vcd }) => {
+                    const well = document.querySelector(`.well[data-row="${row}"][data-col="${column}"]`);
+                    console.log(well);
+                    if (!well) return;
+
+                    well.classList.remove('above', 'below', 'active');
+                    if (vcd === 0) return;
+                    console.log(vcd);
+
+                    well.classList.add('active', vcd >= threshold ? 'above' : 'below');
                 });
+
             };
             reader.readAsText(file);
         }
