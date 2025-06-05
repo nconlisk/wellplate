@@ -49,7 +49,8 @@
 <body>
     <div style="margin: 20px;">
         <input type="file" id="csvInput" accept=".csv">
-        <label>Threshold: <input type="number" id="threshold" value="500000" step="1000"></label>
+        <label>Threshold Min: <input type="number" id="thresholdMin" value="0" step="1000"></label>
+        <label>Max: <input type="number" id="thresholdMax" value="500000" step="1000"></label>
         <button onclick="processCSV()">Apply</button>
         <button onclick="downloadPDF()" style="margin-left: 10px;">Download PDF</button>
     </div>
@@ -105,13 +106,21 @@
     <script>
         function processCSV() {
             const file = document.getElementById('csvInput').files[0];
-            const threshold = parseFloat(document.getElementById('threshold').value);
+            const thresholdMin = parseFloat(document.getElementById('thresholdMin').value);
+            const thresholdMax = parseFloat(document.getElementById('thresholdMax').value);
 
             // Added to label plate based on file name
             const plateName = document.getElementById('plateName');
             let plate = file.name.split('.')[0];
             plateName.textContent = plate;
             //
+
+            // Reset all wells
+            document.querySelectorAll('.well').forEach(well => {
+                well.classList.remove('active', 'above', 'below');
+                well.textContent = '';
+            });
+
 
             // Add well numbers based on if data is first or second plate
             const rows = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H'];
@@ -163,7 +172,11 @@
                     if (vcd === 0) return;
                     console.log(vcd);
 
-                    well.classList.add('active', vcd >= threshold ? 'above' : 'below');
+                    if (vcd > thresholdMax) {
+                        well.classList.add('active', 'above');
+                    } else if (vcd >= thresholdMin && vcd <= thresholdMax) {
+                        well.classList.add('active', 'below');
+                    }
                 });
 
             };
@@ -179,7 +192,7 @@
         function downloadPDF() {
             html2canvas(document.querySelector('.titled-grid')).then(canvas => {
                 const imgData = canvas.toDataURL('image/png');
-                const pdf = new jspdf.jsPDF('p', 'mm', 'a4');
+                const pdf = new jspdf.jsPDF('l', 'mm', 'a4');
                 const imgWidth = 280;
                 const imgHeight = canvas.height * imgWidth / canvas.width;
 
